@@ -70,9 +70,28 @@ sensor:
           window_size: 3
           send_every: 1
     on_value:
-      - sensor.template.publish:
-          id: smart_scale_hx711_value
-          state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
+      then:
+        - sensor.template.publish:
+            id: smart_scale_hx711_value
+            state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
+        - if:
+            condition:
+              # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
+              - lambda: 'return id(smart_scale_hx711_value).state < 10.0;'
+            then:
+              - if:
+                  condition:
+                    # current raw scale value is below expected zero value
+                    - lambda: 'return id(smart_scale_hx711_value_raw).state < (id(initial_zero) - id(auto_tare_difference));'
+                  then:
+                    # INcrease Auto-Tare offset to slowly align real zero value with expected zero value
+                    - lambda: |-
+                        id(auto_tare_difference) += 10;
+                  else:
+                    # DEcrease Auto-Tare offset to slowly align real zero value with expected zero value
+                    - lambda: |-
+                        id(auto_tare_difference) -= 10;
+            
 
     
   # Mapped value to KG
@@ -85,6 +104,9 @@ sensor:
       - lambda: 'return x + id(auto_tare_difference);'
       # apply rough calibration
       - calibrate_linear:
+          # retrieve these values by evaluating the raw values with loads of known mass.
+          # note that a bigger difference between measurements usually results in higher resolution,
+          # so measure 0 Kg and the highest known mass you have (like own weight, measured by a normal scale with good accuracy)
           - -481989 -> 0
           - 1339163 -> 88.3
       # map values below 0.1 to 0 (to decrease value changes due to random fluctuation)
@@ -98,24 +120,3 @@ sensor:
     unit_of_measurement: kg
     accuracy_decimals: 2
     update_interval: 0.2s
-
-interval:
-  - interval: 200ms
-    then:
-      - if:
-          condition:
-            # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
-            - lambda: 'return id(smart_scale_hx711_value).state < 10.0;'
-          then:
-            - if:
-                condition:
-                  # current raw scale value is below expected zero value
-                  - lambda: 'return id(smart_scale_hx711_value_raw).state < (id(initial_zero) - id(auto_tare_difference));'
-                then:
-                  # INcrease Auto-Tare offset to slowly align real zero value with expected zero value
-                  - lambda: |-
-                      id(auto_tare_difference) += 10;
-                else:
-                  # DEcrease Auto-Tare offset to slowly align real zero value with expected zero value
-                  - lambda: |-
-                      id(auto_tare_difference) -= 10;
