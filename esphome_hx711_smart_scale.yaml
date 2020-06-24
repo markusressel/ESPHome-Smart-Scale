@@ -106,7 +106,7 @@ sensor:
       - calibrate_linear:
           # retrieve these values by evaluating the raw values with loads of known mass.
           # note that a bigger difference between measurements usually results in higher resolution,
-          # so measure 0 Kg and the highest known mass you have (like own weight, measured by a normal scale with good accuracy)
+          # so measure 0 Kg and the highest known mass you have (like f.ex. your own weight, measured by a normal scale with good accuracy)
           - -481989 -> 0
           - 1339163 -> 88.3
       # map values below 0.1 to 0 (to decrease value changes due to random fluctuation)
