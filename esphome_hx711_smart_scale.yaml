@@ -1,0 +1,121 @@
+## Node configuration ##
+
+esphome:
+  name: smart_scale
+  platform: ESP8266
+  board: nodemcuv2
+
+globals:
+  - id: auto_tare_difference
+    type: float
+    restore_value: yes
+    initial_value: '0'
+    
+  - id: initial_zero
+    type: float
+    restore_value: yes
+    # NOTE: make sure to align this value to the one used in "calibrate_linear" below!
+    initial_value: '-481989'
+
+wifi:
+  fast_connect: True  # needed for hidden SSID
+  networks:
+    - ssid: 'YourSSID'
+      bssid: '00:00:00:00:00:00'
+      password: 'YourPassword'
+      hidden: true
+  #manual_ip:
+  #  static_ip: 192.168.5.49
+  #  gateway: 192.168.5.1
+  #  subnet: 255.255.255.0
+
+api:
+  password: "YourApiPassword"
+
+# Enable logging
+logger:
+  level: ERROR
+
+ota:
+  password: 'YourOtaPassword'
+
+status_led:
+  pin:
+    number: GPIO2
+    inverted: True
+
+text_sensor:
+  - platform: version
+    name: "Smart Scale ESPHome Version"
+
+## Sensor Configuration ##
+sensor:
+  # Wifi Strength
+  - platform: wifi_signal
+    name: "Smart Scale WiFi Signal"
+    update_interval: 15s
+
+  # RAW Scale input
+  - platform: hx711
+    id: smart_scale_hx711_value_raw
+    internal: True
+    dout_pin: D0
+    clk_pin: D1
+    gain: 128
+    unit_of_measurement: kg
+    accuracy_decimals: 3
+    update_interval: 0.2s
+    filters:
+      - sliding_window_moving_average:
+          window_size: 3
+          send_every: 1
+    on_value:
+      - sensor.template.publish:
+          id: smart_scale_hx711_value
+          state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
+
+    
+  # Mapped value to KG
+  - platform: template
+    id: smart_scale_hx711_value
+    name: "Smart Scale HX711 Value"
+    internal: False
+    filters:
+      # apply auto_tare difference
+      - lambda: 'return x + id(auto_tare_difference);'
+      # apply rough calibration
+      - calibrate_linear:
+          - -481989 -> 0
+          - 1339163 -> 88.3
+      # filter out values below 0
+      - lambda: |-
+          if (x <= 0.0) {
+            return 0.0;
+          } else {
+            return x;
+          }
+          
+    unit_of_measurement: kg
+    accuracy_decimals: 2
+    update_interval: 0.2s
+
+interval:
+  - interval: 200ms
+    then:
+      - if:
+          condition:
+            # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
+            - lambda: 'return id(smart_scale_hx711_value).state < 10.0;'
+          then:
+            - if:
+                condition:
+                  # current raw scale value is below expected zero value
+                  - lambda: 'return id(smart_scale_hx711_value_raw).state < (id(initial_zero) - id(auto_tare_difference));'
+                then:
+                  # INcrease Auto-Tare offset to slowly align real zero value with expected zero value
+                  - lambda: |-
+                      id(auto_tare_difference) += 10;
+                else:
+                  # DEcrease Auto-Tare offset to slowly align real zero value with expected zero value
+                  - lambda: |-
+                      id(auto_tare_difference) -= 10;
