@@ -87,9 +87,9 @@ sensor:
       - calibrate_linear:
           - -481989 -> 0
           - 1339163 -> 88.3
-      # filter out values below 0
+      # map values below 0.1 to 0 (to decrease value changes due to random fluctuation)
       - lambda: |-
-          if (x <= 0.0) {
+          if (x <= 0.1) {
             return 0.0;
           } else {
             return x;
