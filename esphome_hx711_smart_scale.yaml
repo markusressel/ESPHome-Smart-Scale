@@ -6,16 +6,26 @@ esphome:
   board: nodemcuv2
 
 globals:
-  - id: auto_tare_difference
-    type: float
-    restore_value: yes
-    initial_value: '0'
-    
   - id: initial_zero
     type: float
     restore_value: yes
     # NOTE: make sure to align this value to the one used in "calibrate_linear" below!
     initial_value: '-481989'
+    
+  - id: auto_tare_enabled
+    type: bool
+    restore_value: yes
+    initial_value: 'true'
+
+  - id: auto_tare_difference
+    type: float
+    restore_value: yes
+    initial_value: '0'
+    
+  - id: manual_tare_flag
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 wifi:
   fast_connect: True  # needed for hidden SSID
@@ -43,18 +53,61 @@ status_led:
   pin:
     number: GPIO2
     inverted: True
-
-text_sensor:
-  - platform: version
-    name: "Smart Scale ESPHome Version"
+    
+switch:
+  ## Switch to enable/disable the auto tare feature
+  - platform: template
+    id: smart_scale_continuous_tare_enabled
+    name: "Smart Scale Continuous Tare Enabled"
+    lambda: |-
+      return id(auto_tare_enabled);
+    turn_on_action:
+      - lambda: |-
+          id(auto_tare_enabled) = true;
+    turn_off_action:
+      - lambda: |-
+          id(auto_tare_enabled) = false;
+  
+  ## Switch used to initiate a manual tare
+  - platform: template
+    id: smart_scale_manual_tare_action_switch
+    name: "Smart Scale Manual Tare Action"
+    lambda: |-
+      return id(manual_tare_flag);
+    turn_on_action:
+      - lambda: |-
+          id(auto_tare_difference) = id(initial_zero) - id(smart_scale_hx711_value_raw).state;
+      - switch.turn_off: smart_scale_manual_tare_action_switch
+    turn_off_action:
+      - lambda: |-
+          id(manual_tare_flag) = false;
 
 ## Sensor Configuration ##
 sensor:
-  # Wifi Strength
-  - platform: wifi_signal
-    name: "Smart Scale WiFi Signal"
-    update_interval: 15s
-
+  # template sensors from global variables
+  - platform: template
+    id: smart_scale_initial_zero
+    name: "Smart Scale Initial Zero"
+    lambda: |-
+      return id(initial_zero);
+    update_interval: 1s
+    
+  - platform: template
+    id: smart_scale_auto_tare_difference
+    name: "Smart Scale Auto Tare Difference"
+    lambda: |-
+      return id(auto_tare_difference);
+    update_interval: 1s
+    
+  # sensors imported from home assistant
+  - platform: homeassistant
+    id: homeassistant_initial_zero
+    entity_id: input_number.smart_scale_initial_zero
+    on_value:
+      then:
+        - lambda: |-
+            id(initial_zero) = x;
+  
   # RAW Scale input
   - platform: hx711
     id: smart_scale_hx711_value_raw
@@ -76,8 +129,10 @@ sensor:
             state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
         - if:
             condition:
-              # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
-              - lambda: 'return id(smart_scale_hx711_value).state < 10.0;'
+              and:
+                - lambda: 'return id(auto_tare_enabled);'
+                # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
+                - lambda: 'return id(smart_scale_hx711_value).state < 10.0;'
             then:
               - if:
                   condition:
@@ -91,7 +146,6 @@ sensor:
                     # DEcrease Auto-Tare offset to slowly align real zero value with expected zero value
                     - lambda: |-
                         id(auto_tare_difference) -= 10;
-            
 
     
   # Mapped value to KG
