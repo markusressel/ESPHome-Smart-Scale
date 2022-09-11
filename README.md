@@ -33,6 +33,44 @@ Credit: https://circuitjournal.com/img/articles/10_50kg_load_cell/HX711_4x50kg_l
 Add the ESPHome device to Home Assistant via the "Integrations" page.
 The sensors and buttons will automatically appear.
 
+The configuration for the card as seen at the top relies on the 
+[multiple-entity-row](https://github.com/benct/lovelace-multiple-entity-row) custom component.
+
+<img src="images/hass-dashboard.png" width=420 alt="Dashboard Card for this Smart Scale"></p>
+
+Lovelace Configuration:
+
+```yaml
+title: Devices
+type: vertical-stack
+cards:
+  - type: entities
+    show_header_toggle: false
+    state_color: false
+    entities:
+      - entities:
+          - entity: switch.smart_scale_continuous_tare_enabled
+            name: Auto Tare
+            toggle: true
+          - entity: button.smart_scale_manual_tare_action
+            name: Manual Tare
+            type: Button
+            icon: mdi:scale-balance
+            tap_action:
+              action: call-service
+              service: button.press
+              service_data:
+                entity_id: button.smart_scale_manual_tare_action
+          - entity: sensor.smart_scale_hx711_value
+            name: Current
+        entity: input_number.weight_markus
+        name: Smart Scale
+        icon: mdi:scale-bathroom
+        secondary_info: last-changed
+        state_header: Markus
+        type: custom:multiple-entity-row
+```
+
 ## Initial Calibration
 
 ### Preparations
