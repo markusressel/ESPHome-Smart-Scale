@@ -21,11 +21,6 @@ globals:
     type: float
     restore_value: yes
     initial_value: '0'
-    
-  - id: manual_tare_flag
-    type: bool
-    restore_value: no
-    initial_value: 'false'
 
 wifi:
   fast_connect: True  # needed for hidden SSID
@@ -53,7 +48,18 @@ status_led:
   pin:
     number: GPIO2
     inverted: True
-    
+
+button:
+
+  ## Button used to initiate a manual tare
+  - platform: template
+    id: smart_scale_manual_tare_action_switch
+    name: "Smart Scale Manual Tare Action"
+    icon: mdi:scale-balance
+    on_press:
+      - lambda: |-
+          id(auto_tare_difference) = id(initial_zero) - id(smart_scale_hx711_value_raw).state;
+
 switch:
   ## Switch to enable/disable the auto tare feature
   - platform: template
@@ -67,20 +73,6 @@ switch:
     turn_off_action:
       - lambda: |-
           id(auto_tare_enabled) = false;
-  
-  ## Switch used to initiate a manual tare
-  - platform: template
-    id: smart_scale_manual_tare_action_switch
-    name: "Smart Scale Manual Tare Action"
-    lambda: |-
-      return id(manual_tare_flag);
-    turn_on_action:
-      - lambda: |-
-          id(auto_tare_difference) = id(initial_zero) - id(smart_scale_hx711_value_raw).state;
-      - switch.turn_off: smart_scale_manual_tare_action_switch
-    turn_off_action:
-      - lambda: |-
-          id(manual_tare_flag) = false;
 
 ## Sensor Configuration ##
 sensor:
