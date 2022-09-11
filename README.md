@@ -1,5 +1,10 @@
-# ESPHome-Smart-Scale
-An ESPHome based Smart Scale.
+<h1 align="center">
+  ESPHome-Smart-Scale
+</h1>
+
+<h4 align="center">An ESPHome based Smart Scale.</h4>
+
+<p align="center"><img src="images/hass-dashboard.png" width=512 alt="Home Assistant Example Card"></p>
 
 ## What you need
 
