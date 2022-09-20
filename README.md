@@ -2,10 +2,18 @@
   ESPHome-Smart-Scale
 </h1>
 
-<h4 align="center">An ESPHome based Smart Scale.</h4>
+<h4 align="center">An [ESPHome][esphome] based Smart Scale.</h4>
 
 <p align="center"><img src="images/hass-dashboard.png" width=512 alt="Home Assistant Example Card"></p>
 <p align="center"><img src="images/scale-hardware.jpg" width=512 alt="Modified Scale Hardware"></p>
+
+## Features
+
+* [x] Based on [ESPHome][esphome]
+* [x] Realtime transmission to Home Assistant
+* [x] On-device mapping of raw sensor values to Kg scale (or whatever unit you want to use instead)
+* [x] Automatically accounts for sensor shifts due to temperature changes
+* [x] Instant tare with a click of a button
 
 ## What you need
 
@@ -161,3 +169,5 @@ toggle. This will immediately adjust the weight curve to make the current weight
 # License
 
 CC0 see [LICENSE](LICENSE)
+
+[esphome]: https://esphome.io/
