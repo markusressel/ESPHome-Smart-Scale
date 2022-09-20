@@ -147,7 +147,7 @@ globals:
 
 After that, upload the firmware again and you should be good to go!
 
-> Note: Remember to set back the `internal: True` on the internal sensor, to avoid spamming
+> **Note:** Remember to set back the `internal: True` on the internal sensor, to avoid spamming
 Home Assistant with the raw sensor values.
 
 ## Auto Tare
