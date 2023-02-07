@@ -111,9 +111,11 @@ sensor:
     accuracy_decimals: 3
     update_interval: 0.2s
     filters:
-      - sliding_window_moving_average:
-          window_size: 3
+      - quantile:
+          window_size: 10
           send_every: 1
+          send_first_at: 1
+          quantile: .9
     on_value:
       then:
         - sensor.template.publish:
