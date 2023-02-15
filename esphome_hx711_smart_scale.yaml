@@ -107,8 +107,6 @@ sensor:
     dout_pin: D0
     clk_pin: D1
     gain: 128
-    unit_of_measurement: kg
-    accuracy_decimals: 3
     update_interval: 0.2s
     filters:
       - quantile:
