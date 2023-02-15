@@ -167,4 +167,4 @@ sensor:
           
     unit_of_measurement: kg
     accuracy_decimals: 2
-    update_interval: 0.2s
+    update_interval: never
