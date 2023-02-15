@@ -107,8 +107,6 @@ sensor:
     dout_pin: D0
     clk_pin: D1
     gain: 128
-    unit_of_measurement: kg
-    accuracy_decimals: 3
     update_interval: 0.2s
     filters:
       - quantile:
@@ -167,4 +165,5 @@ sensor:
           
     unit_of_measurement: kg
     accuracy_decimals: 2
-    update_interval: 0.2s
+    # the sensor will automatically update through the 'sensor.template.publish' call
+    update_interval: never
