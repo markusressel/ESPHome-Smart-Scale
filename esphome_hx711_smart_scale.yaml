@@ -167,4 +167,5 @@ sensor:
           
     unit_of_measurement: kg
     accuracy_decimals: 2
+    # the sensor will automatically update through the 'sensor.template.publish' call
     update_interval: never
