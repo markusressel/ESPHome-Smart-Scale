@@ -53,8 +53,8 @@ button:
 
   ## Button used to initiate a manual tare
   - platform: template
-    id: smart_scale_manual_tare_action_switch
-    name: "Smart Scale Manual Tare Action"
+    id: "${sensor_name}_manual_tare_action_switch"
+    name: "${friendly_name} Manual Tare Action"
     icon: mdi:scale-balance
     on_press:
       - lambda: |-
@@ -63,8 +63,8 @@ button:
 switch:
   ## Switch to enable/disable the auto tare feature
   - platform: template
-    id: smart_scale_continuous_tare_enabled
-    name: "Smart Scale Continuous Tare Enabled"
+    id: "${sensor_name}_smart_scale_continuous_tare_enabled"
+    name: "${friendly_name} Continuous Tare Enabled"
     lambda: |-
       return id(auto_tare_enabled);
     turn_on_action:
@@ -78,15 +78,15 @@ switch:
 sensor:
   # template sensors from global variables
   - platform: template
-    id: smart_scale_initial_zero
-    name: "Smart Scale Initial Zero"
+    id: "${sensor_name}_smart_scale_initial_zero"
+    name: "${friendly_name} Initial Zero"
     lambda: |-
       return id(initial_zero);
     update_interval: 1s
     
   - platform: template
-    id: smart_scale_auto_tare_difference
-    name: "Smart Scale Auto Tare Difference"
+    id: "${sensor_name}_smart_scale_auto_tare_difference"
+    name: "${friendly_name} Auto Tare Difference"
     lambda: |-
       return id(auto_tare_difference);
     update_interval: 1s
@@ -94,7 +94,7 @@ sensor:
   # sensors imported from home assistant
   - platform: homeassistant
     id: homeassistant_initial_zero
-    entity_id: input_number.smart_scale_initial_zero
+    entity_id: "input_number.${sensor_name}_initial_zero"
     on_value:
       then:
         - lambda: |-
@@ -102,10 +102,10 @@ sensor:
   
   # RAW Scale input
   - platform: hx711
-    id: smart_scale_hx711_value_raw
+    id: "${sensor_name}_hx711_value_raw" 
     internal: True
-    dout_pin: D0
-    clk_pin: D1
+    dout_pin: GPIO16 #pin D0 on the WEMOS device
+    clk_pin: GPIO5 #pin D1 on the WEMOS device
     gain: 128
     update_interval: 0.2s
     filters:
@@ -117,19 +117,19 @@ sensor:
     on_value:
       then:
         - sensor.template.publish:
-            id: smart_scale_hx711_value
-            state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
+            id: "${sensor_name}_hx711_value" 
+            state: !lambda 'return id("${sensor_name}_hx711_value_raw").state;'
         - if:
             condition:
               and:
                 - lambda: 'return id(auto_tare_enabled);'
                 # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
-                - lambda: 'return id(smart_scale_hx711_value).state < 10.0;'
+                - lambda: 'return id("${sensor_name}_hx711_value").state < 10.0;'
             then:
               - if:
                   condition:
                     # current raw scale value is below expected zero value
-                    - lambda: 'return id(smart_scale_hx711_value_raw).state < (id(initial_zero) - id(auto_tare_difference));'
+                    - lambda: 'return id("${sensor_name}_hx711_value_raw").state < (id(initial_zero) - id(auto_tare_difference));'
                   then:
                     # INcrease Auto-Tare offset to slowly align real zero value with expected zero value
                     - lambda: |-
@@ -142,8 +142,8 @@ sensor:
     
   # Mapped value to KG
   - platform: template
-    id: smart_scale_hx711_value
-    name: "Smart Scale HX711 Value"
+    id: "${sensor_name}_hx711_value"
+    name: "${friendly_name} HX711 Value"
     internal: False
     filters:
       # apply auto_tare difference
