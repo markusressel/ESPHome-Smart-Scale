@@ -91,6 +91,14 @@ sensor:
     lambda: |-
       return id(auto_tare_difference);
     update_interval: 1s
+
+  - platform: template
+    id: smart_scale_auto_tare_deviance
+    entity_category: "diagnostic"
+    name: "Smart Scale Auto Tare Deviance"
+    lambda: |-
+      return (int((id(smart_scale_hx711_value_raw).state - (id(initial_zero) - id(auto_tare_difference)) ) / 100)) * 100;
+    update_interval: 1s
     
   # sensors imported from home assistant
   - platform: homeassistant
@@ -126,6 +134,8 @@ sensor:
                 - lambda: 'return id(auto_tare_enabled);'
                 # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
                 - lambda: 'return id(smart_scale_hx711_value).state < 10.0;'
+                # only update if the current deviance is not 0
+                - lambda: 'return id(smart_scale_auto_tare_deviance).state != 0.0;'
             then:
               - if:
                   condition:
@@ -140,7 +150,7 @@ sensor:
                     - lambda: |-
                         id(auto_tare_difference) -= 10;
 
-    
+
   # Mapped value to KG
   - platform: template
     id: smart_scale_hx711_value
