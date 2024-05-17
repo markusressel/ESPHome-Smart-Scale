@@ -165,7 +165,7 @@ sensor:
 
   - platform: template
     id: smart_scale_hx711_value_raw_diagnostic
-    name: "Smart Scale Initial HX711 Raw Value"
+    name: "Smart Scale HX711 Raw Value"
     entity_category: "diagnostic"
 
   # Mapped value to KG
