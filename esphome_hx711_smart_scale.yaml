@@ -65,6 +65,7 @@ switch:
   - platform: template
     id: smart_scale_continuous_tare_enabled
     name: "Smart Scale Continuous Tare Enabled"
+    entity_category: "config"
     lambda: |-
       return id(auto_tare_enabled);
     turn_on_action:
