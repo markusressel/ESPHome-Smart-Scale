@@ -59,6 +59,9 @@ button:
     on_press:
       - lambda: |-
           id(auto_tare_difference) = id(initial_zero) - id(smart_scale_hx711_value_raw).state;
+      - sensor.template.publish:
+          id: smart_scale_hx711_value_raw_diagnostic
+          state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
 
 switch:
   ## Switch to enable/disable the auto tare feature
@@ -130,6 +133,16 @@ sensor:
             state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
         - if:
             condition:
+              - lambda: |-
+                  auto n = id(smart_scale_hx711_value_raw_diagnostic).state;
+                  auto n_str = to_string(n);
+                  return str_equals_case_insensitive(n_str, "NaN");
+            then:
+              - sensor.template.publish:
+                  id: smart_scale_hx711_value_raw_diagnostic
+                  state: !lambda 'return id(smart_scale_hx711_value_raw).state;'
+        - if:
+            condition:
               and:
                 - lambda: 'return id(auto_tare_enabled);'
                 # current smart scale value is below approx. 10KG (raw value -275743) aka nobody is standing on the scale
@@ -150,6 +163,10 @@ sensor:
                     - lambda: |-
                         id(auto_tare_difference) -= 10;
 
+  - platform: template
+    id: smart_scale_hx711_value_raw_diagnostic
+    name: "Smart Scale Initial HX711 Raw Value"
+    entity_category: "diagnostic"
 
   # Mapped value to KG
   - platform: template
