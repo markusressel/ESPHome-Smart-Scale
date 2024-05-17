@@ -90,7 +90,7 @@ sensor:
     
   - platform: template
     id: smart_scale_auto_tare_difference
-    name: "Smart Scale Auto Tare Difference"
+    name: "Smart Scale Auto Tare Zero Calibration Offset"
     lambda: |-
       return id(auto_tare_difference);
     update_interval: 1s
@@ -98,7 +98,7 @@ sensor:
   - platform: template
     id: smart_scale_auto_tare_deviance
     entity_category: "diagnostic"
-    name: "Smart Scale Auto Tare Deviance"
+    name: "Smart Scale Calibration Deviance"
     lambda: |-
       return (int((id(smart_scale_hx711_value_raw).state - (id(initial_zero) - id(auto_tare_difference)) ) / 100)) * 100;
     update_interval: 1s
