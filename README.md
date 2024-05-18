@@ -86,9 +86,11 @@ cards:
 To do the initial calibration we need to be able to read the raw sensor values of the
 HX711 sensor in real time. We can do this a couple of ways, f.ex. by
 
+* Using the diagnostic sensor "HX711 RAW Value" exposed to Home Assistant
+  * This sensor is only updated once right after the ESP has booted
+  * To update the value simply press the "Manual Tare" Button
 * plugging the ESP in via USB and using a serial monitor
 * reading the ESPHome logs
-* temporarily exposing the raw sensor to Home Assistant (set `internal: False` in the YAML config)
 
 ### 0 Kg baseline
 
@@ -146,9 +148,6 @@ globals:
 ```
 
 After that, upload the firmware again and you should be good to go!
-
-> **Note:** Remember to set back the `internal: True` on the internal sensor, to avoid spamming
-Home Assistant with the raw sensor values.
 
 ## Auto Tare
 
