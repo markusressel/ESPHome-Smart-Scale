@@ -42,6 +42,7 @@ logger:
   level: ERROR
 
 ota:
+  platform: esphome
   password: 'YourOtaPassword'
 
 status_led:
