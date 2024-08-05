@@ -20,6 +20,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: ESPHome Builder
-        uses: esphome/build-action@v3.2.0
+        uses: esphome/build-action@v4.0.1
         with:
           yaml_file: esphome_hx711_smart_scale.yaml
