@@ -22,4 +22,4 @@ jobs:
       - name: ESPHome Builder
         uses: esphome/build-action@v4.0.1
         with:
-          yaml_file: esphome_hx711_smart_scale.yaml
+          yaml-file: esphome_hx711_smart_scale.yaml
