@@ -20,13 +20,13 @@
 * Any standard scale of choice
 * An HX711 ADC converter
 * An ESP8266, ESP32 or similar board
-  * A power supply (preferrably USB)
+  * A power supply (preferably USB)
 
 ## Flashing the firmware
 
 * Create a new ESPHome configuration YAML file
 * Copy the contents of [esphome_hx711_smart_scale.yaml](esphome_hx711_smart_scale.yaml) into it
-* Customize the basic device cnfiguration (Board, WiFi, etc.) to your liking
+* Customize the basic device configuration (Board, WiFi, etc.) to your liking
 * Flash it onto your ESP based board
 
 ## Wiring
