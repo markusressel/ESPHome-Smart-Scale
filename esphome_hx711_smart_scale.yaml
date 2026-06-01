@@ -36,7 +36,8 @@ wifi:
   #  subnet: 255.255.255.0
 
 api:
-  password: "YourApiPassword"
+  encryption:
+    key: !secret smart_scale.api_encryption_key
 
 # Enable logging
 logger:
